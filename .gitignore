@@ -1,0 +1,11 @@
+.DS_Store
+*.log
+.env
+
+coverage
+node_modules
+uploads
+certificatePdf
+tmp
+certs
+*.idea
