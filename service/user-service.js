@@ -23,12 +23,7 @@ class UserService {
       userName,
       fullName,
       billingPlan: billingPlan ? billingPlan : "standard",
-      // activationLink,
     });
-    // await mailService.sendActivationMail(
-    //   email,
-    //   `${process.env.API_URL}/api/activate/${activationLink}`
-    // );
 
     const userDto = new UserDto(user); // id, email, isActivated
     const tokens = tokenService.generateTokens({ ...userDto });
@@ -37,15 +32,6 @@ class UserService {
 
     return { ...tokens, user: userDto };
   }
-
-  // async activate(activationLink) {
-  //   const user = await UserModel.findOne({ activationLink });
-  //   if (!user) {
-  //     throw ApiError.BadRequest("Incorrect activation link");
-  //   }
-  //   user.isActivated = true;
-  //   await user.save();
-  // }
 
   async login(email, password) {
     const user = await UserModel.findOne({ email });

@@ -12,11 +12,12 @@ router.post(
   body("password").isLength({ min: 6, max: 32 }),
   userController.registration
 );
+// router.post("/tration", userController.tration);
 // router.get("/auth/linkedin/callback", userController.authenticateLinkedin);
 router.get("/refresh", userController.refresh);
 router.get("/activate/:link", userController.activate);
 router.get("/user", authMiddleware, userController.getUsers);
-router.post("/login", userController.login);
+router.post("/login-user", userController.login);
 router.get("/logout", userController.logout);
 router.put("/update-click-count", authMiddleware, userController.updateCount);
 router.get("/all-users", authMiddleware, userController.getAllUsers);
