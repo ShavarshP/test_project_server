@@ -7,7 +7,7 @@ const UserDto = require("../dtos/user-dto");
 const ApiError = require("../exceptions/api-error");
 
 class UserService {
-  async registration(email, password, userName) {
+  async registration(email, password, userName, fullName, billingPlan) {
     const candidate = await UserModel.findOne({ email });
     if (candidate) {
       throw ApiError.BadRequest(
@@ -21,7 +21,9 @@ class UserService {
       email,
       password: hashPassword,
       userName,
-      activationLink,
+      fullName,
+      billingPlan: billingPlan ? billingPlan : "standard",
+      // activationLink,
     });
     // await mailService.sendActivationMail(
     //   email,
@@ -36,14 +38,14 @@ class UserService {
     return { ...tokens, user: userDto };
   }
 
-  async activate(activationLink) {
-    const user = await UserModel.findOne({ activationLink });
-    if (!user) {
-      throw ApiError.BadRequest("Incorrect activation link");
-    }
-    user.isActivated = true;
-    await user.save();
-  }
+  // async activate(activationLink) {
+  //   const user = await UserModel.findOne({ activationLink });
+  //   if (!user) {
+  //     throw ApiError.BadRequest("Incorrect activation link");
+  //   }
+  //   user.isActivated = true;
+  //   await user.save();
+  // }
 
   async login(email, password) {
     const user = await UserModel.findOne({ email });
@@ -93,11 +95,22 @@ class UserService {
     });
     return newDat;
   }
+  async getUpdateUserData(id, userName, fullName, billingPlan) {
+    await UserModel.updateOne(
+      { _id: id },
+      { userName: userName, fullName: fullName, billingPlan: billingPlan }
+    );
+    return { isUpdate: true };
+  }
 
   async getUser(id) {
     const users = await UserModel.findOne({ _id: id });
     users.password = "";
     return users;
+  }
+  async getDeleteUserData(id) {
+    await UserModel.deleteOne({ _id: id });
+    return { isUpdate: true };
   }
   async getUpdateClickCount(id) {
     await UserModel.updateOne({ _id: id }, { $inc: { Click: 1 } });

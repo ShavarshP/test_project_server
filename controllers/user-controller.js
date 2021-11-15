@@ -9,13 +9,14 @@ class UserController {
       if (!errors.isEmpty()) {
         return next(ApiError.BadRequest("Validation error", errors.array()));
       }
-      const { email, password, userName } = req.body;
+      const { email, password, userName, fullName, billingPlan } = req.body;
       const userData = await userService.registration(
         email,
         password,
-        userName
+        userName,
+        fullName,
+        billingPlan
       );
-      console.log({ ss: "email, password, userName" });
       res.cookie("refreshToken", userData.refreshToken, {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
@@ -25,20 +26,20 @@ class UserController {
       next(e);
     }
   }
-  authenticateLinkedin = (req, res, next) => {
-    const {
-      linkedinFromURL,
-      withMeAss,
-      view_job: viewJob,
-      referer,
-    } = req.query;
-    let state = { linkedinFromURL, withMeAss, viewJob, referer };
-    state = JSON.stringify(state);
-    passport.authenticate("linkedin", {
-      state,
-      scope: ["r_liteprofile", "r_emailaddress"],
-    })(req, res, next);
-  };
+  // authenticateLinkedin = (req, res, next) => {
+  //   const {
+  //     linkedinFromURL,
+  //     withMeAss,
+  //     view_job: viewJob,
+  //     referer,
+  //   } = req.query;
+  //   let state = { linkedinFromURL, withMeAss, viewJob, referer };
+  //   state = JSON.stringify(state);
+  //   passport.authenticate("linkedin", {
+  //     state,
+  //     scope: ["r_liteprofile", "r_emailaddress"],
+  //   })(req, res, next);
+  // };
 
   async login(req, res, next) {
     try {
@@ -48,7 +49,6 @@ class UserController {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
       });
-      console.log(userData.user.id);
       await userService.getUpdateVisitsCount(userData.user.id);
       return res.json(userData);
     } catch (e) {
@@ -61,6 +61,7 @@ class UserController {
       const { refreshToken } = req.cookies;
       const token = await userService.logout(refreshToken);
       res.clearCookie("refreshToken");
+      console.log({ sssss: "sssssssss" });
       return res.json(token);
     } catch (e) {
       next(e);
@@ -103,12 +104,42 @@ class UserController {
   async getAllUsers(req, res, next) {
     try {
       const { id } = req.user;
-      if (id != "618fdd9baf8b5cb6fb9ab41c") {
+      if (id != "6190f598fedf676a7b7a4607") {
         throw ApiError.BadRequest("You are not an admin");
       }
-      console.log(id);
       const users = await userService.getAllUsers();
       return res.json({ users });
+    } catch (e) {
+      next(e);
+    }
+  }
+  async updateUserData(req, res, next) {
+    try {
+      const { id } = req.user;
+      const { UserId, userName, fullName, billingPlan } = req.body;
+      if (id != "6190f598fedf676a7b7a4607") {
+        throw ApiError.BadRequest("You are not an admin");
+      }
+      const data = await userService.getUpdateUserData(
+        UserId,
+        userName,
+        fullName,
+        billingPlan
+      );
+      return res.json({ data });
+    } catch (e) {
+      next(e);
+    }
+  }
+  async deleteUserData(req, res, next) {
+    try {
+      const { id } = req.user;
+      const { UserId } = req.body;
+      if (id != "6190f598fedf676a7b7a4607") {
+        throw ApiError.BadRequest("You are not an admin");
+      }
+      const data = await userService.getDeleteUserData(UserId);
+      return res.json({ data });
     } catch (e) {
       next(e);
     }
